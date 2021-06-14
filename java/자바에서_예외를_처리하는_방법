@@ -1,0 +1,381 @@
+## Exception
+### 자바에서 예외를 처리하는 방법
+
+<br>
+
+## 예외 처리를 하는 이유
+**예외적인 상황을 대비하여 미리 안전장치를 하는 것**
+자바 프로그램에서는 예외 상황이 발생하면, 예외를 발생시킵니다. 특히 unchecked exception 같은 예외는 프로그램 실행 중 발생되는 예외인데, 서비스가 정상적으로 운영중이다가도 예외가 발생하면 프로세스가 강제적으로 종료됩니다. 
+
+때문에 프로그램의 안정적인 운영에 있어서 예외는 필수입니다. 이러한 예외적인 상황은 예외처리(Exception Handling)를 통해 프로세스가 강제적으로 종료되지 않고 예외 상황이 발생해도 운영이 가능하도록 핸들링을 할 수가 있습니다.
+
+<br>
+
+## 자바에서 예외 처리를 하는 방법, try-catch
+**자바에서 예외 처리를 하는 방법**
+try catch는 예외 처리를 할 때, 일반적으로 사용되는 예외 처리 방법입니다. try 구문에는 예외 발생 가능성이 있는 문장을 넣어주고, catch 구문은 try 구문에서 예외가 발생하면 어떻게 처리를 할 것인지 작성합니다.
+
+<br>
+
+```
+try {
+        예외 발생 가능성이 있는 문장
+    } catch(예외의 종류) {
+        예외가 발생하면 처리할 문장
+    }
+```
+
+<br>
+
+**try 블록**
+- 예외 발생 가능성이 있는 문장을 묶어줍니다.
+
+**catch 블록**
+- 예외가 발생하면 처리할 문장입니다.
+- 매개변수로는 예외의 종류를 둘 수 있으며, try 블록에서 발생한 예외 메세지나 객체를 인수로 받아 처리합니다.
+- catch 블록에 아무런 내용을 작성해주지 않으면, 어디서 오류가 발생했는지 파악하기가 어렵기 때문에 특수한 상황이 아니라면 항상 로그를 남기도록 하는게 좋습니다.
+
+<br>
+
+## 예외를 발생시키는 throw 와 예외를 떠넘기는 throws 키워드
+**예외를 강제적으로 발생시키고, 예외를 떠넘긴다.**
+throw는 예외를 발생시키는 키워드입니다. throw 를 사용하기 위해서는, 예외 클래스 객체를 만들어주고 throw 로 예외를 강제적으로 발생시킵니다.
+
+throws 는 예외를 떠넘기는 방법으로 어떠한 메서드를 호출할 때 그 메서드가 throws 키워드로 정의가 되어 있으면, 해당 메서드는 메서드를 호출한 곳에서 강제적으로 예외를 처리해주어야 합니다. 강제적으로 처리하지 않고 throws 로 예외를 다시 떠넘겨도 되나, 해당 방법은 좋지 않은 방법입니다. 
+
+예외를 다시 떠넘기게 된다면 비정상 종료가 되면서 이 예외는 JVM에게 넘겨지게 됩니다. JVM이 받아서 JVM 기본 예외처리기에 의해 마지막으로 처리를 하게 되어 오류를 출력합니다. throws 는 예외를 떠넘기는 것 뿐이지, 예외를 처리하는 것이 아닙니다. 떠넘긴 곳까지 처리를 하지 못하기 때문에 JVM 은 오류를 뱉습니다. 하여 예외 처리가 될 수 있도록 하려면 try catch 문으로 처리를 하여야 합니다.
+
+하기와 같이 파일을 생성하는 코드를 작성하여 throws 키워드를 createFile 메서드의 시그니처에 추가하였습니다.
+
+<br>
+
+
+```
+    public static void main(String[] args) {
+        File file = createFile("Doa");
+    }
+
+    static File createFile(String fileName) throws Exception {
+        if (fileName == null || fileName.equals(""))
+            throw new Exception();  // checked exception
+
+        File file = new File(fileName);
+        file.createNewFile();
+        return file;
+    }
+    
+```
+> * https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html (java api document, File)
+
+<br>
+
+위 코드는 checked exception 이므로, 예외처리를 반드시 해주어야 컴파일이 됩니다.
+제가 작성한 코드에서는 전달받은 인수가 null 이거나, 아무런 문자열도 전달하지 않았을 경우에 예외를 발생시키도록 작성하였고 이 예외와 관련된 메서드를 호출한 메서드에서 예외 처리를 해주지 않았습니다. 때문에 컴파일이 되지 않습니다.
+
+하기와 같이 코드를 수정하여 예외를 호출한 메서드 내에서 예외 처리를 하도록 합니다.
+
+<br>
+
+```
+    public static void main(String[] args) {
+        try {
+            File file = createFile("");
+        } catch(Exception e) {
+            System.out.println("파일 생성 실패 : " + e.getMessage());
+        }
+    }
+
+    static File createFile(String fileName) throws Exception {
+        if (fileName == null || fileName.equals(""))
+            throw new Exception();  // checked exception
+
+        File file = new File(fileName);
+        file.createNewFile();
+        return file;
+    }
+```
+
+<br>
+
+만약에 메서드를 호출한 메인 메서드 내에서도 예외를 떠넘긴다면 어떻게 될까요?
+하기와 같이 호출 스택에서 오류를 뱉습니다.
+
+<br>
+
+```
+Exception in thread "main" java.lang.Exception
+	at c.exception.ExceptionSample76.createFile(ExceptionSample76.java:12)
+	at c.exception.ExceptionSample76.main(ExceptionSample76.java:7)
+```
+
+
+<br>
+
+
+## finally, 반드시 실행되어야 하는 문장!
+**반드시 실행되어야 하는 문장인 finally**
+finally 는 예외 발생 여부에 관계 없이 무조건 실행이 되어야만 하는 문장입니다. 예외 처리 다음 문장에 수행할 동작을 넣어주면 되는데 왜  굳이 finally 를 사용할까요? 가령 예외처리를 수행한 메서드 내에서 리턴값을 받는다고 가정한다면, try와 catch 문에서 return 을 만나게 되면 프로그램은 무조건 중단이 됩니다. try 구문 바깥에 예외 발생 여부에 관계 없이 원하는 코드를 작성한다고 한들, 리턴값을 돌려주게 되면 메서드를 빠져나와 실행이 될 수가 없습니다. 그래서 try catch 구문 내에 동일한 코드를 반복적으로 작성을 해주어야만 하는데요. 이 때 중복되는 코드를 줄여줄 수 있는 장점이 있습니다.
+
+<br>
+
+```
+    public static void main(String[] args) {
+        try {
+            File file = createFile("doa");
+        } catch(Exception e) {
+            System.out.println("파일 생성 실패 : " + e.getMessage());
+        } finally {
+            System.out.println("반드시 실행되어야만 하는 문장");
+        }
+    }
+
+    static File createFile(String fileName) throws Exception {
+        if (fileName == null || fileName.equals(""))
+            throw new Exception();  // checked exception
+
+        File file = new File(fileName);
+        file.createNewFile();
+        return file;
+    }
+```
+
+<br>
+
+
+## try finally 와 try-with-resources
+Java7 부터 나온 try-with-resource 는 자원을 닫아주는 역할을 합니다. try-with-resource 문법을 사용하면 close() 를 호출하지 않아도 예외가 발생한 여부와 관계 없이 finally 와 같이 반드시 close 메서드가 호출됩니다. 
+
+close 는 어떤 때에 사용이 될까요? 예를 들자면, 네트워크와 데이터베이스와 관련된 작업을 마치고 Max Connection 를 방지하기 위해 finally 블록에서 close() 하여 Connection 을 끊을 수도 있고, 데이터베이스 뿐만 아니라 파일 개수 등과 같이 시스템에서는 허용되는 자원의 한계가 있어 리소스를 계속 열기만 하고 닫지 않는다면 허용되는 자원의 개수를 초과할 수 있으므로 자원 사용이 끝나면 반드시 close 를 해주어야만 합니다. 또한 Java 라이브러리 중에서는 close 메서드를 호출하여 직접 닫아줘야만 하는 자원이 많습니다. 직접 닫아줘야만 하는 자원으로는 입출력 스트림인 InputStream와 OutputStream 그리고 Connection 등이 있는데요. 자원 닫기는 예측할 수 없는 성능 문제로 이어지기도 하기 때문에 사용이 종료되었으면 반드시 닫아주어야만 합니다.
+
+이러한 자원을 회수할 때 try finally 블럭을 이용해서 사용한 자원을 회수할 수 있는데, finally 는 해당 절 내에서도 Exception 이 발생하는 경우가 있다고 합니다. 또한 코드가 복잡해지는 경우가 많아 try-with-resource 를 사용하여 코드를 더 짧고, 분명해지도록 구현이 가능하여 회수해야 하는 자원을 다룰 때는 try-with-resource 를 사용하는 것이 좋습니다.
+
+이를 비교해보기 위해서 하기의 코드를 작성하였습니다.
+
+<br>
+
+```
+package c.exception;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+public class ExceptionSample77 {
+    public static void main(String[] args) {
+        FileInputStream file = null;
+
+        try {
+            file = new FileInputStream("doas"); // 존재하지 않는 파일인 doas 파일
+        } catch(FileNotFoundException e) {
+            System.out.println("파일이 존재하지 않습니다 : " + e.getMessage());
+            return;
+        } catch(Exception e) {
+            System.out.println("파일이 존재하지 않습니다 : " + e.getMessage());
+            return;
+        } finally {
+            if (file != null) {
+                try {
+                    file.close(); // 파일 입력 스트림 close
+                } catch(IOException e) {
+                    System.out.println("" + e.getMessage());
+                }
+            }
+        }
+    }
+}
+
+```
+
+> https://docs.oracle.com/javase/7/docs/api/java/io/FileInputStream.html (java document api, FileInputStream)
+
+<br>
+
+아래와 같이 try with resources 구문으로 코드를 변경하였습니다. 
+기존에 finally 를 사용하였을 때보다, 코드가 훨씬 간결해진 것을 확인해볼 수 있습니다.
+~~(잘못된 코드일 수도 있습니다.)~~
+
+<br>
+
+
+```
+public class ExceptionSample78 {
+    public static void main(String[] args) {
+        try(FileInputStream file = new FileInputStream("doas")) {
+
+        } catch(FileNotFoundException e) {
+            System.out.println("파일이 존재하지 않습니다. : " + e.getMessage());
+        } catch(IOException e) {
+            e.printStackTrace();
+        } catch(Exception e) {
+            System.out.println("파일이 존재하지 않습니다 : " + e.getMessage());
+        }
+    }
+}
+```
+
+<br>
+
+해당 코드를 조금 수정하여 close 메서드가 호출이 되는지, 되지 않는지 테스트를 해보기 위해 AutoCloseable 인터페이스를 구현하여 close 메서드를 구현해보겠습니다.
+
+<br>
+
+
+```
+public class ExceptionSample78 implements AutoCloseable  {
+    public static void main(String[] args) {
+        try(ExceptionSample78 file = new ExceptionSample78()) {
+
+        } catch(FileNotFoundException e) {
+            System.out.println("파일이 존재하지 않습니다. : " + e.getMessage());
+        } catch(IOException e) {
+            e.printStackTrace();
+        } catch(Exception e) {
+            System.out.println("파일이 존재하지 않습니다 : " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        System.out.println("close() 테스트");
+    }
+}
+```
+
+<br>
+
+출력되는 결과는 다음과 같습니다.
+
+<br>
+
+```
+close() 테스트
+```
+
+<br>
+
+close 메서드를 별도로 호출하지 않아도, try-with-resources 구문을 사용하여 close 가 호출되는 것을 확인해 볼 수 있습니다. 
+신기하네요! 
+
+try-with-resource 구문의 예외 처리 방법은 Java9 부터는 아래와 같이 변수명을 지정하여 사용이 가능하다고 합니다. 저는 Java8 을 사용 중이라 별도로 테스트를 해보지는 못했습니다.
+
+<br>
+
+```
+public class ExceptionSample78 implements AutoCloseable  {
+    public static void main(String[] args) {
+        ExceptionSample78 file = new ExceptionSample78();
+        try(file) {
+
+        } catch(FileNotFoundException e) {
+            System.out.println("파일이 존재하지 않습니다. : " + e.getMessage());
+        } catch(IOException e) {
+            e.printStackTrace();
+        } catch(Exception e) {
+            System.out.println("파일이 존재하지 않습니다 : " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        System.out.println("close() 테스트");
+    }
+}
+
+```
+
+
+
+<br>
+
+## 자바가 제공하는 예외 계층 구조를 알아보자
+**모든 예외의 조상은 java.lang.Throwable 클래스이다.**
+자바에서의 예외 계층 구조는 다음과 같습니다. 
+가장 먼저, 모든 클래스의 최상위 클래스인 Object 클래스를 확장한 모든 예외의 조상 클래스인 Throwable 클래스, 그리고 Throwable 클래스를 확장한 Error 클래스와 Exception 클래스로 분류할 수 있습니다. Error 클래스는 자바 프로그램 외에서 발생하는 오류이며, Exception 클래스는 자바 프로그램 내에서 발생하는 오류입니다.
+
+<br>
+
+![](https://images.velog.io/images/pearl0725/post/6fb4c530-39de-4774-99a6-7257f88f5fc1/image.png)
+
+
+
+
+
+<br>
+
+## Exception 클래스와 Error 클래스의 차이는 무엇일까?
+그럼 Exception 클래스와 Error 클래스의 차이는 무엇일까요? 
+Error 클래스는 앞서 이야기 드린 내용과 같이, 자바 프로그램 외에서 발생하는 오류입니다. 이를테면 하드웨어적인 문제가 발생했을 경우에는 개발자가 자바 프로그램을 수정하여 조치를 할 수가 없습니다. 가령 메모리의 사용률이 초과하여 프로세스가 정상적으로 동작하지 않을 수도 있고, 하드디스크에 배드섹터가 발생하여 디스크 교체가 필요한 경우가 발생할 수 있으며, 메인보드가 맛이 간다던지. 하드웨어적으로 발생하는 것을 예로 들을 수 있습니다.
+
+Excpetion 클래스는 자바 프로그램 내에서 발생하는 오류입니다. 해당 클래스는 RuntimeException와 RE를 제외한 Exception 클래스의 그 자손들 두 가지로 분류를 할 수가 있습니다. 
+
+
+<br>
+
+
+## RuntimeException과 RE가 아닌 것의 차이는?
+**컴파일러가 예외 처리 여부를 체크하느냐, 체크하지 않느냐의 차이, checked exception와 unchecked exception**
+RuntimeException 은 unchecked exception 이라고도 합니다. 프로그램 내에서 예외처리는 강제적이지 않고, 선택적입니다. checked exception 은 RuntimeException을 제외한 나머지입니다. Exception 클래스와 그 자손들이라고 볼 수 있습니다.
+
+- checked exception : 예외를 반드시 처리 -> 예외처리를 해주지 않으면, 컴파일이 되지 않습니다.
+- unchecked exception : 예외는 선택적 -> checked exception 와는 다르게 예외 처리를 강제적으로 하지 않습니다.
+
+```
+package c.exception;
+
+public static void main(String[] args) {
+        // checked exception
+        try {
+            throw new Exception();
+        } catch(Exception e) {
+            System.out.println("checked exception은 반드시 예외 처리가 필요합니다.");
+        }
+
+        // unchecked exception
+        throw new RuntimeException("unchecked exception은 예외 처리가 선택적입니다.");
+    }
+```
+
+<br>
+
+## checked 예외와 unchecked 예외, 분류를 하는 이유가 무엇일까?
+만약에 unchecked 예외도 컴파일러가 예외를 처리하게 한다면 어떻게 될까요? 예를들어 모든 참조 변수는 NullPointerException 이 발생할 가능성이 있습니다. 마찬가지로 모든 배열도 ArrayIndexOutOfBoundsException 이 발생할 가능성이 있습니다. 
+
+모든 배열은 범위를 벗어날 가능성이 있고, 모든 참조 변수에는 null 값이 대입이 될 수 있습니다. 만일 컴파일러가 이러한 것들을 모두 예외 처리를 강제적으로 하게 한다면, 모든 배열과 모든 참조 변수에 예외 처리를 해야만 합니다. 
+
+즉 코드는 대부분 데이터를 다루게 되어 있는데, 거의 모든 코드에 try catch 블럭을 매번 넣어야만 한다는 것입니다. 때문에 unchecked exception 으로 분류해서 선택적으로 예외를 처리하게 합니다. 하여 이러한 부분은 프로그래머가 잘 파악을 하고 예외 처리를 해주어야 합니다.
+
+<br>
+
+## 커스텀한 예외를 만드는 방법
+Exception 클래스와 RuntimeException 클래스를 상속 받아 직접 예외 클래스를 정의할 수 있습니다. 그러나 Exception 을 처리하는 클래스라면 java.lang.Exception 클래스를 상속 받아 사용하는 것이 좋습니다.
+
+<br>
+
+```
+public class ExceptionSample80 extends Exception {
+    public ExceptionSample80() {
+        super();
+    }
+    public ExceptionSample80(String message) {
+        super(message); // 예외 메세지를 받기 위함
+    }
+
+    public void throwMyException(int number) throws ExceptionSample80 {
+        if (number > 12)
+            throw new ExceptionSample80("Number is over than 12");
+    }
+
+    public static void main(String[] args) {
+        ExceptionSample80 sample = new ExceptionSample80();
+        try {
+            sample.throwMyException(13);
+        } catch(ExceptionSample80 e) {
+            System.out.println("예외 메세지 : " + e.getMessage());
+        }
+    }
+}
+```
+
+
+<br>
+

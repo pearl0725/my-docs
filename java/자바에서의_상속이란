@@ -1,0 +1,437 @@
+
+
+
+## 객체지향 프로그래밍의 장점, 상속!
+
+- 상속은 프로그램 확장 및 수정을 용이하게 합니다. 개인적인 생각이지만, 저는 객체지향 프로그래밍의 가장 큰 장점이 상속이 아닐까 생각을 합니다.
+- 예로들어 여러 클래스가 있을 때, 해당 클래스들에서 동일한 기능을 하는 메서드가 필요한 경우가 있다고 가정한다면, 이 때 **부모 클래스가 될 상위 클래스에서 해당 메서드를 구현하고, 이 기능이 필요한 하위 클래스들은 이 기능을 일일히 구현해낼 필요 없이 상위 클래스를 상속 받아 사용**하면 됩니다.
+- 상속 받은 클래스의 메서드를 기능을 수정하고 싶은 경우에는 **메서드 오버라이딩을 이용하여 메서드의 기능을 재정의**하여 사용할 수 있습니다.
+- 또한 기능의 추가 및 수정이 필요할 경우 상속받은 상위 클래스에 메서드만 수정하거나 추가하면 되므로 유지보수 하기에 굉장히 좋습니다.
+- **컴파일시 상위 클래스의 멤버 변수가 힙 영역에 먼저 적재가 되기 때문에 하위 클래스에서는 상위 클래스의 변수를 모두 사용**할 수 있습니다.
+
+
+![](https://images.velog.io/images/pearl0725/post/8ed4cafb-c575-4bd3-9610-781ab11a9ec9/image.png)
+
+<br>
+
+## Practice
+
+- 하기의 코드와 같이 상속을 테스트를 할 코드를 작성하였습니다. A 클래스는 상속받은 Alphabet 클래스 내부의 aMethod() 메서드를 A 클래스 내부에 정의하지 않아도 사용할 수 있습니다.
+
+```java
+package Extends;
+
+class Alphabet {
+    protected void practiceMethod() {
+        System.out.println("practice");
+    }
+}
+
+class A extends Alphabet {
+    void aMethod() {
+        System.out.println("TEST");
+    }
+}
+
+=========================================================
+
+package Extends;
+
+public class AlphabetTest {
+    public static void main(String[] args) {
+        A prac = new A();
+        prac.aMethod();
+        prac.practiceMethod();  // 상위 클래스의 메소드
+    }
+}
+```
+
+<br>
+
+## 상속 관계에서 하위 클래스가 상위 클래스의 변수와 메서드를 어떻게 사용할 수 있는 걸까?
+
+**부모를 부르는 예약어, super()**
+
+- 상기의 Alphabet 크래스 코드를 일부 수정하여 생성자가 호출되는 순서를 확인해보겠습니다.
+- 동일한 클래스에 각 디폴트 생성자를 추가하여 호출 순서를 확인해보면, 하위 클래스의 객체를 생성할 때에 생성한 클래스의 생성자가 먼저 호출되는 것이 아닌, 부모 클래스의 생성자가 먼저 호출이 되고 그 다음으로 생성한 객체의 생성자가 호출이 되는 것을 확인할 수 있습니다.
+    - 즉, 컴파일시 부모 클래스도 함께 컴파일이 됩니다.
+
+```java
+package Extends;
+
+class Alphabet {
+    Alphabet() {
+        System.out.println("Alphabet 클래스의 생성자 호출");
+    }
+
+    protected void practiceMethod() {
+        System.out.println("practice");
+    }
+}
+
+class A extends Alphabet {
+    A() {
+        System.out.println("A 클래스의 생성자 호출");
+    }
+
+    void aMethod() {
+        System.out.println("TEST");
+    }
+}
+
+===============================================================
+
+package Extends;
+
+public class AlphabetTest {
+    public static void main(String[] args) {
+        A prac = new A();
+    }
+}
+```
+
+<br>
+
+하위 클래스의 객체를 생성하기 위해 생성자를 호출하였을 때, 부모 클래스의 생성자가 먼저 호출이 되는 이유는 다음과 같습니다.
+
+부모를 부르는 예약어인 super() 함수가 컴파일시 하위 클래스의 생성자에 자동으로 추가가 되기 때문인데, super() 키워드는 this 가 자기 자신의 참조 값을 가지고 있는 것과 동일하게 부모 클래스의 참조 값을 가지고 있는 예약어입니다. 이 키워드는 상위 클래스의 생성자를 호출하는 데에도 사용이 됩니다.
+
+만일, 상위 클래스에 디폴트 생성자가 없고 매개변수가 있는 생성자만 있을 경우엔 super() 에 매개변수를 추가하여, 매개변수가 있는 상위 클래스의 생성자를 직접 호출합니다.
+
+<br>
+
+```java
+class A extends Alphabet {
+    A() {
+        // super(); -> 생성자 내부 상위에 호출
+        System.out.println("A 클래스의 생성자 호출");
+    }
+```
+
+<br>
+
+## 이 기능은 마음에 안 들어, 수정할래!
+
+**기능을 재정의하자, 메서드 오버라이딩**
+
+- 메서드 오버로딩은 메서드명과 기능만을 동일하게 하고, 메소드의 매개변수와 타입만을 변경하여 사용합니다. 반면, 메서드 오버라이딩은 메서드의 기능을 재정의하는 경우 사용합니다.
+- 상속받은 클래스의 메서드 수정이 필요한 경우에 메서드 오버라이딩을 이용하여 기능을 재정의 할 수 있습니다.
+- 생성자는 부모 클래스의 생성자가 super() 예약어로 인해 가장 먼저 호출이 되지만, 일반 메서드는 자식 클래스에 부모 클래스와 동일한 메서드가 있는 경우 자식 클래스의 메서드로 호출합니다.
+
+<br>
+
+
+```java
+package Extends;
+
+class Alphabet {
+    Alphabet() {
+        System.out.println("Alphabet 클래스의 생성자 호출");
+    }
+
+    protected void practiceMethod() {
+        System.out.println("practice");
+    }
+}
+
+class A extends Alphabet {
+    A() {
+        System.out.println("A 클래스의 생성자 호출");
+    }
+
+    void aMethod() {
+        System.out.println("TEST");
+    }
+
+    @Override
+    protected void practiceMethod() {
+        System.out.println("Modify the function");
+    }
+}
+```
+
+<br>
+
+## Override Annotation
+
+해당 코드에 Override 라는 애노테이션을 추가하였는데, 애노테이션은 주석이라는 의미로 @ 기호와 함께 사용합니다. 자바에서 제공하는 애노테이션은 컴파일러에게 특정한 정보를 제공해 주는 역할을 합니다. 즉, Override 를 추가하여 해당 메서드가 재정의된 메서드라는 것을 컴파일러에게 알립니다.
+
+메서드를 재정의 하기 전, 메모리 참조 값은 부모 클래스의 메서드 영역 주소를 참조하여 명령이 실행되는데 메서드를 재정의하면 메모리 참조 값은 실제 인스턴스에 해당하는 메서드가 호출되게 됩니다. (실제 인스턴스 = 부모 클래스가 아닌 자식 클래스의 실제 인스턴스의 메서드 호출) 아래는 상기 작성했던 코드의 가상 메서드를 표현한 그림입니다.
+
+<br>
+
+- **메서드 재정의 전**
+![](https://images.velog.io/images/pearl0725/post/c7cfe0da-7d48-43ad-8db6-ab2b6ff8684f/image.png)
+
+- **메서드 재정의 후**
+![](https://images.velog.io/images/pearl0725/post/436b5666-1ddd-4feb-b587-8cc9a6d602ae/image.png)
+
+<br>
+
+## 상속과 클래스 형 변환, Upcasting
+
+**묵시적 형 변환**
+
+- 묵시적 형 변환이란, 바이트 크기가 작은 자료형에서 큰 자료형으로 대입하는 경우를 일컫습니다.
+
+```java
+byte bNum = 10;
+int iNum = bNum; // byte형 변수인 bNum 값을 int형 변수 iNum에 대입한다.
+```
+
+상기와 같이 클래스 또한 상속받은 상위 클래스로 형 변환이 가능합니다. 테스트를 했던 코드에서는 A 클래스가 Alphabet 클래스를 상속을 받았었습니다. 즉 A 클래스는 A 자료형이면서 동시에 Alphabet 자료형이기도 하므로 A 클래스 인스턴스를 생성할 때 인스턴스의 자료형을 부모 클래스로 클래스 형 변환하여 선언이 가능합니다. → 부모 클래스가 자식 클래스로 형 변환하는 것은 성립되지 않습니다. 자식 클래스는 부모 클래스의 기능을 모두 가졌지만, 부모 클래스는 자식 클래스의 기능을 사용할 수가 없습니다.
+
+```java
+Alphabet prac = new A();
+```
+
+<br>
+
+## 클래스의 형 변환을 사용하는 이유가 무엇일까?
+
+**동일한 이름을 가지고 여러 형태의 액션을 취하는 다형성**
+
+- 묵시적 클래스 형 변환과 가상 메서드를 바탕으로 추상 클래스와 인터페이스에 응용이 가능한 다형성, **동일한 네이밍을 가지고 여러 자료형으로 구현되어 실행**될 수 있습니다.
+- 부모 클래스에서 정의한 메서드만 사용이 가능합니다.
+- 자식 클래스에서 부모 클래스에 정의되어 있지 않은 메서드를 정의하면 사용이 불가능합니다.
+
+<br>
+
+## Practice
+
+- Alphabet 클래스를 상속 받는 A, B, C 클래스 구현
+- 자식 클래스는 상위 클래스의 practiceMethod() 를 오버라이딩
+
+```java
+package Extends;
+
+class Alphabet {
+
+    void practiceMethod() {
+        System.out.println("practice");
+    }
+}
+
+class A extends Alphabet {
+
+    void practiceMethod() {
+        System.out.println("practice A");
+    }
+}
+
+class B extends Alphabet {
+
+    void practiceMethod() {
+        System.out.println("practice B");
+    }
+}
+
+class C extends Alphabet {
+
+    void practiceMethod() {
+        System.out.println("practice C");
+    }
+}
+```
+
+<br>
+
+하기 코드의 practiceMethodTest 메서드는 어떠한 인스턴스가 매개변수로 넘어와도 모두 Alphabet 형으로 변환합니다. Alphabet 에서 상속받은 클래스가 매개변수로 넘어오면 모두 상위 클래스 형으로 변환되므로 해당 클래스의 메서드를 호출할 수 있습니다. alphabet.pracriceMethod() 코드는 변함이 없지만, **어떠한 매개변수가 넘어왔느냐에 따라서 출력되는 결과가 달라지는데 이것을 다형성**이라고 합니다.
+
+<br>
+
+```java
+package Extends;
+
+public class AlphabetTest {
+    public static void main(String[] args) {
+        AlphabetTest prac = new AlphabetTest();
+        prac.practiceMethodTest(new A());
+        prac.practiceMethodTest(new B());
+        prac.practiceMethodTest(new C());
+    }
+
+    // 매개변수의 자료형이 상위 클래스이다.
+    public void practiceMethodTest(Alphabet alphabet) {
+        alphabet.practiceMethod();
+    }
+}
+```
+
+<br>
+
+실행되는 결과를 그림으로 표현하면 다음과 같습니다.
+![](https://images.velog.io/images/pearl0725/post/fd5c49e6-a8bb-4ea9-b995-d81f2edcfd8f/image.png)
+
+<br>
+
+
+![](https://images.velog.io/images/pearl0725/post/db562e28-0673-422b-902c-6d98790a102d/image.png)
+
+<br>
+
+만일 practiceMethod 의 동일한 기능을 가진 D 라는 하위 클래스가 추가가 된다면, Alphabet 클래스를 상속받아 구현하면 모든 클래스를 Alphabet 자료형 하나로 쉽게 관리가 가능합니다. 이처럼 상위 클래스에서 공통된 부분의 메서드를 구현하고, 하위 클래스에서는 추가 요소만 덧붙여 구현하면 코드의 길이가 줄어들고 유지보수가 편리합니다. → 만일 오버라이딩한 메서드에서 부모 클래스의 기능이 필요하다면 super() 키워드 혹은 this() 키워드를 이용할 수 있습니다.
+
+<br>
+
+
+
+
+## 내가 가진 기능을 사용하려면 반드시 명시한 기능을 구현해야 돼, 추상클래스!
+
+- 용어 그대로 추상적인 클래스라는 의미입니다. (=구체적이지 않은 클래스)
+- **미구현된 추상 메서드가 한 개 이상 포함**이 되어 있으며, **상속** 받아 사용합니다. 즉, 상속받아 사용한다는 것은 부모 클래스가 되는 추상 클래스에서 일반 메서드를 정의하여 메서드를 오버라이딩하거나 재사용이 가능합니다. → 일반 메서드 정의가 가능하다는 이야기는, 생성자 또한 가질 수 있다는 것 **(인터페이스 역할 + 상속)**
+- **반드시 구현이 되어야 하는 기능은 추상 메서드로 정의**하고 **공통으로 사용되는 기능은 구현된 일반 메서드로 정의**합니다.
+
+<br>
+
+## 추상클래스는 어떻게 정의하지?
+
+- 미구현된 메서드를 정의할 클래스에는 abstract 키워드를 사용합니다. → 자식 클래스가 상속 받아 사용하여야 하기 때문에 private 으로 정의하지 않습니다.
+- 미구현된 메서드를 구현할 클래스는 extends 키워드를 사용합니다.
+- 추상 클래스는 객체를 생성할 수 없습니다.
+
+<br>
+
+## 추상클래스의 장단점
+
+**장점**
+
+- 추상클래스는 상속과 인터페이스의 기능을 모두 갖추어 프로그램을 확장할 때에 용이하다는 장점을 가져 프로그램의 수정이 필요할 경우 부모 클래스가 되는 추상클래스의 일반 메서드만을 수정하면 됩니다.
+- 미구현된 추상 메서드를 정의하여 이 기능을 사용하려면, 명시한 요구사항을 만족해야 합니다. 메서드의 이름을 고민하지 않아도 되므로, 시간을 축소할 수 있습니다. → 즉, 표준화 정도를 높힐 수 있습니다.
+- 공통 사항이 한 곳에서 관리되어 개발 및 유지보수가 용이합니다.
+- 상속의 장점으로 컴파일시 메모리 사용률을 줄일 수 있을 것 같다고 생각이 되네요!
+
+**단점**
+
+- 인터페이스는 다중으로 상속을 받을 수 있지만, 추상클래스는 단일 상속만이 가능합니다. 서브 클래스는 한 번에 한 개의 추상 클래스만을 상속받아 사용할 수 있습니다.
+
+<br>
+
+## 추상클래스와 템플릿 메서드
+
+**템플릿 메서드와 final 키워드!**
+
+- **메서드의 실행 순서**와 **시나리오를 정의**하는 것
+- 템플릿 메서드는 final 키워드와 함께 사용하기도 합니다. final 예약어는 클래스 선언부에 추가하였을 경우 상속이 불가능하며, 메소드에 추가 하였을 경우 메소드 오버라이딩이 불가합니다. 변수에 사용했을 경우에는 데이터의 변경이 불가능한 상수와 같은 친구입니다. (C언어의 const 와 유사한 것 같습니다!)
+
+<br>
+
+### Practice
+
+- AbstractParentsClass 추상 클래스
+    - A, B 추상 메서드 정의
+    - 템플릿 메서드인 Alphabet 메서드 정의
+    - AB 일반 메서드 정의
+- AbstractChildClassOne, 추상 클래스를 상속
+    - ChildOne 메서드 정의
+- AbstractChildClassTwo, 추상 클래스를 상속
+    - ChildTwo 메서드를 정의하고, 부모 클래스의 ABCD 메서드를 오버라이딩하여 재정의
+
+<br>
+
+### Diagram
+![](https://images.velog.io/images/pearl0725/post/67300ea0-3b44-4740-99d9-212d4dc926e1/image.png)
+
+<br>
+
+**AbstractParentsClass.java**
+
+```java
+package AbstractPractice;
+
+abstract class AbstractParentsClass {
+    // This is an abstract method
+    abstract void A();
+    abstract void B();
+    void AB() {
+        System.out.println("Practice Abstract Classes");
+    }
+    // This is a template method
+    final void Alphabet() {
+        A();
+        B();
+        AB();
+    }
+}
+```
+
+<br>
+
+**AbstractChildClassOne.java**
+
+```java
+package AbstractPractice;
+
+class AbstractChildClassOne extends AbstractParentsClass {
+    @Override
+    void A() {
+        System.out.println("A");
+    }
+
+    @Override
+    void B() {
+        System.out.println("B");
+    }
+
+    void ChildOne() {
+        System.out.println("Abstract Child Class - AbstractChildClassOne");
+    }
+}
+```
+
+<br>
+
+**AbstractChildClassTwo.java**
+
+```java
+package AbstractPractice;
+
+class AbstractChildClassTwo extends AbstractParentsClass {
+    @Override
+    void A() {
+        System.out.println("AA");
+    }
+
+    @Override
+    void B() {
+        System.out.println("BB");
+    }
+
+    @Override
+    void AB() {
+        System.out.println("Method Overriding");
+    }
+
+    void ChildTwo() {
+        System.out.println("Abstract Child Class - AbstractChildClassTwo");
+    }
+}
+```
+<br>
+
+**테스트**
+
+```java
+package AbstractPractice;
+
+public class AbstractClassTest {
+    public static void main(String[] args) {
+        AbstractParentsClass practiceTestOne = new AbstractChildClassOne();
+        practiceTestOne.A();
+        practiceTestOne.B();
+        practiceTestOne.AB();
+        practiceTestOne.Alphabet();
+
+        AbstractParentsClass practiceTestTwo = new AbstractChildClassTwo();
+        practiceTestTwo.A();
+        practiceTestTwo.B();
+        practiceTestTwo.AB();   // Call the overriding method
+        practiceTestTwo.Alphabet();
+    }
+}
+```
+
+<br>
+
+
